@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OWNER COMMAND MATRIX • PARTH RAJPUROHIT VAULT</title>
+  <link rel="stylesheet" href="../assets/css/vault.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+  <canvas id="bg-canvas"></canvas>
+  <div class="scanline-overlay"></div>
+
+  <div class="app-shell">
+    <!-- Top Command Navigation -->
+    <header class="top-nav">
+      <div class="brand-cluster">
+        <div class="hacker-crest">
+          <svg width="30" height="30" viewBox="0 0 64 64" fill="none">
+            <path d="M32 6L10 16V32C10 47 19.5 56.5 32 60C44.5 56.5 54 47 54 32V16L32 6Z" stroke="#FFD700" stroke-width="3"/>
+            <circle cx="32" cy="32" r="10" fill="#00FF87"/>
+          </svg>
+        </div>
+        <div>
+          <div class="brand-title">OWNER COMMAND MATRIX • PARTH RAJPUROHIT</div>
+          <div class="brand-sub">
+            <span class="status-dot"></span>
+            <span>LOCKED ROOT TERMINAL (9672910018) • </span>
+            <span id="celestial-mode-label">DHAN VARSHA • GOLD RAIN</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="nav-actions">
+        <button class="celestial-btn" id="celestial-toggle-btn">
+          <span>☀️ CELESTIAL REALM</span>
+        </button>
+        <button class="btn-cyber" id="open-sb-config-btn">
+          <span>🔗 SUPABASE SYNC CONFIG</span>
+        </button>
+        <a href="../index.html" class="btn-danger" id="owner-logout-btn">
+          <span>LOCK &amp; EXIT</span>
+        </a>
+      </div>
+    </header>
+
+    <!-- Global Analytics KPI Bar -->
+    <section style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:16px; margin-bottom:26px;">
+      <div class="glass-card" style="padding:18px 22px;">
+        <div style="font-family:var(--font-mono); font-size:0.74rem; color:var(--text-muted);">TOTAL SYSTEM ALLOCATED</div>
+        <div style="font-family:var(--font-mono); font-size:1.75rem; font-weight:800; color:#fff; margin-top:6px;" id="kpi-total-allocated">₹0.00</div>
+      </div>
+      <div class="glass-card" style="padding:18px 22px;">
+        <div style="font-family:var(--font-mono); font-size:0.74rem; color:var(--text-muted);">TOTAL PAID &amp; SETTLED</div>
+        <div style="font-family:var(--font-mono); font-size:1.75rem; font-weight:800; color:var(--cyber-green); margin-top:6px;" id="kpi-total-paid">₹0.00</div>
+      </div>
+      <div class="glass-card" style="padding:18px 22px;">
+        <div style="font-family:var(--font-mono); font-size:0.74rem; color:var(--text-muted);">TOTAL PENDING RECEIVABLES</div>
+        <div style="font-family:var(--font-mono); font-size:1.75rem; font-weight:800; color:var(--gold-primary); margin-top:6px;" id="kpi-total-pending">₹0.00</div>
+      </div>
+      <div class="glass-card" style="padding:18px 22px;">
+        <div style="font-family:var(--font-mono); font-size:0.74rem; color:var(--text-muted);">CURRENT MONTH VOLUME</div>
+        <div style="font-family:var(--font-mono); font-size:1.75rem; font-weight:800; color:#38BDF8; margin-top:6px;" id="kpi-month-total">₹0.00</div>
+      </div>
+    </section>
+
+    <div class="grid-2" style="margin-bottom:26px;">
+      <!-- LEFT: Client Roster, Create New User, & Selected Client Ledger Control -->
+      <div class="glass-card">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:10px;">
+          <div>
+            <h2 style="font-family:var(--font-display); font-size:1.22rem; color:var(--gold-primary);">
+              CLIENT ACCOUNTS &amp; LEDGER CONTROL
+            </h2>
+            <p style="font-size:0.78rem; color:var(--text-muted);">
+              Real Name is Owner-locked. Select any user to inspect or assign payments.
+            </p>
+          </div>
+          <button class="btn-gold" id="open-new-user-modal-btn" style="padding:9px 15px; font-size:0.8rem;">
+            <span>+ CREATE NEW USER</span>
+          </button>
+        </div>
+
+        <!-- User Selector Dropdown -->
+        <label style="font-family:var(--font-mono); font-size:0.75rem; color:var(--gold-primary); display:block; margin-bottom:6px;">
+          ACTIVE CLIENT ACCOUNT:
+        </label>
+        <select id="owner-user-select" class="input-field" style="margin-bottom:14px;"></select>
+
+        <!-- Selected User Summary & 3x Confirm + 5s Timer Safeguard Controls -->
+        <div id="selected-user-banner" style="background:rgba(255,215,0,0.06); border:1px solid rgba(255,215,0,0.28); border-radius:16px; padding:14px; margin-bottom:18px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+            <div>
+              <div style="font-weight:800; font-size:1.05rem; color:#fff;" id="sel-user-realname">-</div>
+              <div style="font-family:var(--font-mono); font-size:0.75rem; color:var(--text-muted);" id="sel-user-meta">-</div>
+            </div>
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+              <button class="btn-cyber" id="owner-download-user-receipt-btn" style="padding:7px 12px; font-size:0.75rem;">
+                📜 SIGNED RECEIPT (PDF)
+              </button>
+              <button class="btn-danger" id="safeguard-clear-history-btn" style="padding:7px 12px; font-size:0.75rem;">
+                CLEAR HISTORY
+              </button>
+              <button class="btn-danger" id="safeguard-delete-user-btn" style="padding:7px 12px; font-size:0.75rem;">
+                DELETE USER
+              </button>
+            </div>
+          </div>
+          <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:12px; pt-2; border-top:1px dashed rgba(255,255,255,0.12); padding-top:10px; font-family:var(--font-mono); font-size:0.78rem;">
+            <div>Allocated: <strong id="sel-user-total" style="color:#fff;">₹0.00</strong></div>
+            <div>Paid: <strong id="sel-user-paid" style="color:var(--cyber-green);">₹0.00</strong></div>
+            <div>Pending: <strong id="sel-user-pending" style="color:var(--gold-primary);">₹0.00</strong></div>
+          </div>
+        </div>
+
+        <!-- Selected User Ledger Entries List -->
+        <div style="font-family:var(--font-mono); font-size:0.78rem; color:var(--gold-primary); margin-bottom:10px;">
+          CLIENT LEDGER ENTRIES (CLICK STATUS TO MARK PAID / UNPAID):
+        </div>
+        <div id="owner-user-ledger-list" style="display:flex; flex-direction:column; gap:10px; max-height:360px; overflow-y:auto;"></div>
+      </div>
+
+      <!-- RIGHT: Assign Dated Decimal Entry Keypad + Owner Instant QR Link Generator -->
+      <div class="glass-card">
+        <h2 style="font-family:var(--font-display); font-size:1.22rem; color:var(--gold-primary); margin-bottom:6px;">
+          ASSIGN PAYMENT / GENERATE CUSTOM QR
+        </h2>
+        <p style="font-size:0.78rem; color:var(--text-muted); margin-bottom:14px;">
+          Use precision decimal keypad to add a dated balance to selected user or export instant QR.
+        </p>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px;">
+          <div>
+            <label style="font-family:var(--font-mono); font-size:0.72rem; color:var(--text-muted);">ENTRY DATE</label>
+            <input type="date" id="owner-entry-date" class="input-field" style="margin-bottom:0;" />
+          </div>
+          <div>
+            <label style="font-family:var(--font-mono); font-size:0.72rem; color:var(--text-muted);">BANK ROUTE</label>
+            <select id="owner-entry-bank" class="input-field" style="margin-bottom:0;">
+              <option value="fampay">FamPay (9672920018@fam)</option>
+              <option value="kotak">Kotak (parthrajpurohit@kotakbank)</option>
+            </select>
+          </div>
+        </div>
+
+        <input type="text" id="owner-entry-note" class="input-field" placeholder="Payment Note / Description (e.g. Monthly Settlement)" />
+
+        <!-- Owner Calculator Screen -->
+        <div class="calc-screen" style="padding:12px 16px;">
+          <div class="calc-label">
+            <span>AMOUNT (SUPPORTS 2 DECIMALS)</span>
+            <span id="owner-keypad-bank-indicator">FAMPAY</span>
+          </div>
+          <div class="calc-value" style="font-size:1.9rem;">₹<span id="owner-calc-display">0</span></div>
+        </div>
+
+        <div class="keypad-grid" id="owner-keypad" style="gap:8px; margin-bottom:14px;">
+          <button class="key-btn" data-key="1" style="padding:11px 0;">1</button>
+          <button class="key-btn" data-key="2" style="padding:11px 0;">2</button>
+          <button class="key-btn" data-key="3" style="padding:11px 0;">3</button>
+          <button class="key-btn" data-key="4" style="padding:11px 0;">4</button>
+          <button class="key-btn" data-key="5" style="padding:11px 0;">5</button>
+          <button class="key-btn" data-key="6" style="padding:11px 0;">6</button>
+          <button class="key-btn" data-key="7" style="padding:11px 0;">7</button>
+          <button class="key-btn" data-key="8" style="padding:11px 0;">8</button>
+          <button class="key-btn" data-key="9" style="padding:11px 0;">9</button>
+          <button class="key-btn" data-key="." style="padding:11px 0;">.</button>
+          <button class="key-btn" data-key="0" style="padding:11px 0;">0</button>
+          <button class="key-btn" data-key="C" style="padding:11px 0; color:var(--danger-crimson);">C</button>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:16px;">
+          <button class="btn-gold" id="owner-add-unpaid-btn">
+            <span>+ ADD UNPAID ENTRY</span>
+          </button>
+          <button class="btn-cyber" id="owner-add-paid-btn">
+            <span>✓ RECORD AS PAID</span>
+          </button>
+        </div>
+
+        <!-- Owner Instant QR & Link Export Box -->
+        <div class="qr-vault-frame" style="padding:14px; margin-bottom:0;">
+          <div style="display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap;">
+            <div class="qr-canvas-wrap" style="padding:8px;">
+              <canvas id="owner-qr-canvas" width="150" height="150"></canvas>
+            </div>
+            <div style="flex:1; text-align:left;">
+              <div style="font-family:var(--font-display); font-weight:700; color:var(--gold-primary); font-size:0.95rem;">
+                OWNER INSTANT QR &amp; LINK GENERATOR
+              </div>
+              <p style="font-size:0.75rem; color:var(--text-muted); margin:6px 0 12px;">
+                Directly share link or download custom gold QR for the keypad amount above.
+              </p>
+              <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                <button class="btn-cyber" id="owner-copy-link-btn" style="padding:8px 12px; font-size:0.75rem;">
+                  📋 COPY UPI LINK
+                </button>
+                <button class="btn-gold" id="owner-download-qr-btn" style="padding:8px 12px; font-size:0.75rem;">
+                  ⬇ DOWNLOAD QR PNG
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Incoming Payment Approval Requests & Global Recent Activity -->
+    <div class="grid-2">
+      <!-- Approval Queue -->
+      <div class="glass-card">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+          <div>
+            <h2 style="font-family:var(--font-display); font-size:1.2rem; color:var(--gold-primary);">
+              INCOMING PAYMENT APPROVAL QUEUE
+            </h2>
+            <p style="font-size:0.76rem; color:var(--text-muted);">
+              Approving auto-deducts from client balance. Rejecting hides it from client view while keeping your audit log.
+            </p>
+          </div>
+        </div>
+        <div id="owner-requests-list" style="display:flex; flex-direction:column; gap:12px; max-height:380px; overflow-y:auto;"></div>
+      </div>
+
+      <!-- Global Recent Transactions -->
+      <div class="glass-card">
+        <h2 style="font-family:var(--font-display); font-size:1.2rem; color:var(--gold-primary); margin-bottom:6px;">
+          GLOBAL RECENT LEDGER ACTIVITY
+        </h2>
+        <p style="font-size:0.76rem; color:var(--text-muted); margin-bottom:14px;">
+          Live chronological stream across FamPay (9672920018@fam) &amp; Kotak (parthrajpurohit@kotakbank).
+        </p>
+        <div id="owner-global-recent-list" style="display:flex; flex-direction:column; gap:10px; max-height:380px; overflow-y:auto;"></div>
+      </div>
+    </div>
+
+    <footer class="lakshmi-altar" style="margin-top:34px; padding:20px;">
+      <div class="footer-credit" style="margin-top:0;">
+        <span>Made with ❤️ by <a href="https://parth27.vercel.app" target="_blank">Parth Rajpurohit</a></span>
+        <span>•</span>
+        <span>Store: <a href="https://aviorcart.vercel.app" target="_blank">aviorcart.vercel.app</a></span>
+        <span>•</span>
+        <span>Portfolio: <a href="https://parth27.vercel.app" target="_blank">parth27.vercel.app</a></span>
+      </div>
+    </footer>
+  </div>
+
+  <!-- MODAL 1: CREATE NEW USER -->
+  <div class="modal-backdrop" id="new-user-modal">
+    <div class="glass-card" style="width:100%; max-width:440px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+        <h3 style="font-family:var(--font-display); color:var(--gold-primary);">PROVISION NEW CLIENT ACCOUNT</h3>
+        <button class="btn-danger" id="close-new-user-modal" style="padding:4px 10px;">✕</button>
+      </div>
+      <form id="create-user-form">
+        <label style="font-family:var(--font-mono); font-size:0.72rem; color:var(--gold-primary);">REAL NAME (LOCKED - ONLY OWNER CAN SET)</label>
+        <input type="text" id="new-user-realname" class="input-field" placeholder="e.g. Rohan Singhania" required />
+
+        <label style="font-family:var(--font-mono); font-size:0.72rem; color:var(--gold-primary);">INITIAL USERNAME (USER CAN EDIT LATER)</label>
+        <input type="text" id="new-user-username" class="input-field" placeholder="e.g. rohan_s" required />
+
+        <label style="font-family:var(--font-mono); font-size:0.72rem; color:var(--gold-primary);">PHONE NUMBER (LOGIN ID)</label>
+        <input type="text" id="new-user-phone" class="input-field" placeholder="e.g. 9811223344" required />
+
+        <label style="font-family:var(--font-mono); font-size:0.72rem; color:var(--gold-primary);">PASSCODE / PASSWORD</label>
+        <input type="text" id="new-user-passcode" class="input-field" value="1234" required />
+
+        <button type="submit" class="btn-gold" style="width:100%;">CREATE &amp; SYNC TO SUPABASE</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL 2: 3-STEP CONFIRMATION + 5-SECOND COUNTDOWN SAFEGUARD -->
+  <div class="modal-backdrop" id="safeguard-modal">
+    <div class="glass-card" style="width:100%; max-width:460px; border-color:var(--danger-crimson);">
+      <h3 style="font-family:var(--font-display); color:var(--danger-crimson); margin-bottom:8px;" id="safeguard-title">
+        CRITICAL DESTRUCTIVE ACTION
+      </h3>
+      <p style="font-size:0.84rem; color:var(--text-muted); margin-bottom:16px;" id="safeguard-desc">
+        This action requires 3 explicit confirmations followed by a mandatory 5-second security lock timer.
+      </p>
+      <div style="font-family:var(--font-mono); font-size:0.85rem; color:var(--gold-primary); margin-bottom:16px;" id="safeguard-step-indicator">
+        CONFIRMATION STEP: 1 OF 3
+      </div>
+      <div style="display:flex; gap:12px;">
+        <button class="btn-cyber" id="safeguard-cancel-btn" style="flex:1;">CANCEL SAFE</button>
+        <button class="btn-danger" id="safeguard-confirm-btn" style="flex:1;">CONFIRM (1/3)</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 3: SUPABASE LIVE CONNECTION SETTINGS -->
+  <div class="modal-backdrop" id="sb-config-modal">
+    <div class="glass-card" style="width:100%; max-width:480px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+        <h3 style="font-family:var(--font-display); color:var(--gold-primary);">SUPABASE CLOUD CREDENTIALS</h3>
+        <button class="btn-danger" id="close-sb-config-modal" style="padding:4px 10px;">✕</button>
+      </div>
+      <p style="font-size:0.78rem; color:var(--text-muted); margin-bottom:14px;">
+        Paste your Supabase Project URL and Anon Public Key after running <code>supabase/schema.sql</code> in the SQL Editor.
+      </p>
+      <label style="font-family:var(--font-mono); font-size:0.72rem; color:var(--gold-primary);">SUPABASE PROJECT URL</label>
+      <input type="text" id="sb-url-input" class="input-field" placeholder="https://xxxx.supabase.co" />
+
+      <label style="font-family:var(--font-mono); font-size:0.72rem; color:var(--gold-primary);">SUPABASE ANON PUBLIC KEY</label>
+      <input type="text" id="sb-key-input" class="input-field" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI..." />
+
+      <button class="btn-gold" id="save-sb-config-btn" style="width:100%;">SAVE &amp; RECONNECT SUPABASE</button>
+    </div>
+  </div>
+
+  <script src="../assets/js/vault-core.js"></script>
+  <script src="../assets/js/receipt-engine.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", async () => {
+      let profiles = [];
+      let allLedger = [];
+      let allRequests = [];
+      let selectedUserId = null;
+      let ownerCalcStr = "0";
+
+      const dateInput = document.getElementById("owner-entry-date");
+      dateInput.value = new Date().toISOString().split("T")[0];
+
+      const userSelect = document.getElementById("owner-user-select");
+      const ownerCalcDisplay = document.getElementById("owner-calc-display");
+      const ownerBankSelect = document.getElementById("owner-entry-bank");
+      const ownerQrCanvas = document.getElementById("owner-qr-canvas");
+
+      async function loadAllData() {
+        profiles = await window.VaultDB.getProfiles();
+        const clients = profiles.filter(p => p.role !== "owner" && p.phone !== "9672910018");
+        allLedger = await window.VaultDB.getLedger();
+        allRequests = await window.VaultDB.getPaymentRequests();
+
+        // Populate User Dropdown
+        userSelect.innerHTML = "";
+        clients.forEach(c => {
+          const opt = document.createElement("option");
+          opt.value = c.id;
+          opt.textContent = `${c.real_name} (@${c.username}) • ${c.phone}`;
+          userSelect.appendChild(opt);
+        });
+
+        if (!selectedUserId && clients.length > 0) {
+          selectedUserId = clients[0].id;
+        }
+        if (selectedUserId) {
+          userSelect.value = selectedUserId;
+        }
+
+        renderGlobalKPIs();
+        renderSelectedUserPanel();
+        renderApprovalQueue();
+        renderGlobalRecentStream();
+        refreshOwnerQr();
+      }
+
+      function renderGlobalKPIs() {
+        let total = 0, paid = 0, pending = 0, monthVol = 0;
+        const nowMonth = new Date().toISOString().slice(0, 7);
+        allLedger.forEach(item => {
+          const amt = Number(item.amount) || 0;
+          total += amt;
+          if (item.status === "paid") paid += amt;
+          else pending += amt;
+          if ((item.entry_date || "").startsWith(nowMonth)) {
+            monthVol += amt;
+          }
+        });
+        document.getElementById("kpi-total-allocated").textContent = `₹${total.toFixed(2)}`;
+        document.getElementById("kpi-total-paid").textContent = `₹${paid.toFixed(2)}`;
+        document.getElementById("kpi-total-pending").textContent = `₹${pending.toFixed(2)}`;
+        document.getElementById("kpi-month-total").textContent = `₹${monthVol.toFixed(2)}`;
+      }
+
+      function renderSelectedUserPanel() {
+        const user = profiles.find(p => p.id === selectedUserId);
+        const listEl = document.getElementById("owner-user-ledger-list");
+        if (!user) {
+          document.getElementById("sel-user-realname").textContent = "No Client Selected";
+          listEl.innerHTML = "";
+          return;
+        }
+
+        document.getElementById("sel-user-realname").textContent = `${user.real_name} (Locked Real Name)`;
+        document.getElementById("sel-user-meta").textContent = `Username: @${user.username} | Phone: ${user.phone} | Passcode: ${user.passcode || "1234"}`;
+
+        const userItems = allLedger.filter(l => l.user_id === user.id);
+        let uTotal = 0, uPaid = 0, uPending = 0;
+        userItems.forEach(i => {
+          const a = Number(i.amount) || 0;
+          uTotal += a;
+          if (i.status === "paid") uPaid += a;
+          else uPending += a;
+        });
+
+        document.getElementById("sel-user-total").textContent = `₹${uTotal.toFixed(2)}`;
+        document.getElementById("sel-user-paid").textContent = `₹${uPaid.toFixed(2)}`;
+        document.getElementById("sel-user-pending").textContent = `₹${uPending.toFixed(2)}`;
+
+        listEl.innerHTML = "";
+        if (userItems.length === 0) {
+          listEl.innerHTML = `<div style="color:var(--text-muted); font-size:0.8rem;">No ledger entries for this client yet.</div>`;
+          return;
+        }
+
+        userItems.forEach(item => {
+          const row = document.createElement("div");
+          row.style.cssText = "display:flex; justify-content:space-between; align-items:center; padding:12px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:12px; gap:10px; flex-wrap:wrap;";
+          const isPaid = item.status === "paid";
+          row.innerHTML = `
+            <div>
+              <div style="font-weight:700; color:#fff; font-size:0.92rem;">₹${Number(item.amount).toFixed(2)} — <span style="color:var(--gold-primary);">${item.note || "Vault Entry"}</span></div>
+              <div style="font-family:var(--font-mono); font-size:0.72rem; color:var(--text-muted); margin-top:3px;">
+                📅 ${item.entry_date} • Route: <strong>${item.bank_target === "kotak" ? "KOTAK BANK" : "FAMPAY"}</strong>
+              </div>
+            </div>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span class="badge ${isPaid ? "badge-paid" : "badge-unpaid"}">${item.status}</span>
+              <button class="btn-cyber toggle-status-btn" data-id="${item.id}" data-next="${isPaid ? "unpaid" : "paid"}" style="padding:6px 10px; font-size:0.72rem;">
+                Mark as ${isPaid ? "Unpaid" : "Paid"}
+              </button>
+            </div>
+          `;
+          listEl.appendChild(row);
+        });
+
+        listEl.querySelectorAll(".toggle-status-btn").forEach(btn => {
+          btn.addEventListener("click", async () => {
+            await window.VaultDB.toggleLedgerStatus(btn.dataset.id, btn.dataset.next);
+            await loadAllData();
+          });
+        });
+      }
+
+      function renderApprovalQueue() {
+        const container = document.getElementById("owner-requests-list");
+        container.innerHTML = "";
+        if (allRequests.length === 0) {
+          container.innerHTML = `<div style="color:var(--text-muted); font-size:0.82rem;">No payment requests submitted yet.</div>`;
+          return;
+        }
+
+        allRequests.forEach(req => {
+          const client = profiles.find(p => p.id === req.user_id);
+          const clientName = client ? `${client.real_name} (@${client.username})` : "Client";
+          const card = document.createElement("div");
+          card.style.cssText = "padding:14px; border-radius:14px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,215,0,0.22); display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap;";
+
+          let statusBadge = `<span class="badge badge-pending">PENDING APPROVAL</span>`;
+          if (req.status === "approved") statusBadge = `<span class="badge badge-paid">APPROVED &amp; DEDUCTED</span>`;
+          if (req.status === "rejected") statusBadge = `<span class="badge badge-unpaid">REJECTED (HIDDEN FROM USER)</span>`;
+
+          card.innerHTML = `
+            <div>
+              <div style="font-weight:700; color:#fff;">${clientName} — <span style="color:var(--gold-primary);">₹${Number(req.amount).toFixed(2)}</span></div>
+              <div style="font-family:var(--font-mono); font-size:0.72rem; color:var(--text-muted); margin-top:4px;">
+                Bank: <strong>${req.bank_target.toUpperCase()}</strong> • Type: ${req.request_type} • Ref: ${req.utr_reference || "N/A"}
+              </div>
+              <div style="margin-top:6px;">${statusBadge}</div>
+            </div>
+            ${req.status === "pending" ? `
+              <div style="display:flex; gap:8px;">
+                <button class="btn-gold approve-req-btn" data-id="${req.id}" style="padding:8px 14px; font-size:0.76rem;">✓ APPROVE</button>
+                <button class="btn-danger reject-req-btn" data-id="${req.id}" style="padding:8px 14px; font-size:0.76rem;">✕ REJECT</button>
+              </div>
+            ` : ""}
+          `;
+          container.appendChild(card);
+        });
+
+        container.querySelectorAll(".approve-req-btn").forEach(btn => {
+          btn.addEventListener("click", async () => {
+            await window.VaultDB.resolvePaymentRequest(btn.dataset.id, "approved");
+            await loadAllData();
+          });
+        });
+
+        container.querySelectorAll(".reject-req-btn").forEach(btn => {
+          btn.addEventListener("click", async () => {
+            await window.VaultDB.resolvePaymentRequest(btn.dataset.id, "rejected");
+            await loadAllData();
+          });
+        });
+      }
+
+      function renderGlobalRecentStream() {
+        const container = document.getElementById("owner-global-recent-list");
+        container.innerHTML = "";
+        allLedger.slice(0, 12).forEach(item => {
+          const client = profiles.find(p => p.id === item.user_id);
+          const div = document.createElement("div");
+          div.style.cssText = "padding:10px 14px; border-radius:12px; background:rgba(255,255,255,0.025); border:1px solid rgba(255,255,255,0.07); display:flex; justify-content:space-between; align-items:center;";
+          div.innerHTML = `
+            <div>
+              <div style="font-size:0.86rem; font-weight:700; color:#fff;">${client ? client.real_name : "User"} • ₹${Number(item.amount).toFixed(2)}</div>
+              <div style="font-family:var(--font-mono); font-size:0.7rem; color:var(--text-muted);">
+                ${item.entry_date} • ${item.bank_target === "kotak" ? "Kotak Bank" : "FamPay"} • ${item.note}
+              </div>
+            </div>
+            <span class="badge ${item.status === "paid" ? "badge-paid" : "badge-unpaid"}">${item.status}</span>
+          `;
+          container.appendChild(div);
+        });
+      }
+
+      // Owner Keypad & QR Logic
+      function updateOwnerKeypad(key) {
+        if (key === "C") {
+          ownerCalcStr = "0";
+        } else if (key === ".") {
+          if (!ownerCalcStr.includes(".")) ownerCalcStr += ".";
+        } else {
+          if (ownerCalcStr.includes(".")) {
+            const parts = ownerCalcStr.split(".");
+            if (parts[1].length >= 2) return;
+          }
+          ownerCalcStr = ownerCalcStr === "0" ? key : ownerCalcStr + key;
+        }
+        refreshOwnerQr();
+      }
+
+      function refreshOwnerQr() {
+        const amt = Math.max(1, parseFloat(ownerCalcStr) || 0);
+        ownerCalcDisplay.textContent = ownerCalcStr;
+        const bank = ownerBankSelect.value;
+        document.getElementById("owner-keypad-bank-indicator").textContent = bank.toUpperCase();
+        const links = buildUpiLinks(amt, bank, document.getElementById("owner-entry-note").value || "Parth Vault Entry");
+        renderCustomGoldQR(ownerQrCanvas, links.genericUpi, bank);
+      }
+
+      document.querySelectorAll("#owner-keypad .key-btn").forEach(btn => {
+        btn.addEventListener("click", () => updateOwnerKeypad(btn.dataset.key));
+      });
+
+      ownerBankSelect.addEventListener("change", refreshOwnerQr);
+
+      document.getElementById("owner-add-unpaid-btn").addEventListener("click", async () => {
+        if (!selectedUserId) return;
+        const amt = parseFloat(ownerCalcStr);
+        if (!amt || amt <= 0) return;
+        await window.VaultDB.addLedgerEntry({
+          user_id: selectedUserId,
+          amount: amt,
+          entry_date: dateInput.value,
+          note: document.getElementById("owner-entry-note").value.trim() || "Assigned Vault Balance",
+          bank_target: ownerBankSelect.value,
+          status: "unpaid"
+        });
+        document.getElementById("owner-entry-note").value = "";
+        await loadAllData();
+      });
+
+      document.getElementById("owner-add-paid-btn").addEventListener("click", async () => {
+        if (!selectedUserId) return;
+        const amt = parseFloat(ownerCalcStr);
+        if (!amt || amt <= 0) return;
+        await window.VaultDB.addLedgerEntry({
+          user_id: selectedUserId,
+          amount: amt,
+          entry_date: dateInput.value,
+          note: document.getElementById("owner-entry-note").value.trim() || "Direct Settled Payment",
+          bank_target: ownerBankSelect.value,
+          status: "paid"
+        });
+        document.getElementById("owner-entry-note").value = "";
+        await loadAllData();
+      });
+
+      document.getElementById("owner-copy-link-btn").addEventListener("click", async (e) => {
+        const amt = Math.max(1, parseFloat(ownerCalcStr) || 0);
+        const links = buildUpiLinks(amt, ownerBankSelect.value);
+        await navigator.clipboard.writeText(links.genericUpi);
+        e.currentTarget.textContent = "✅ COPIED!";
+        setTimeout(() => (e.currentTarget.textContent = "📋 COPY UPI LINK"), 1800);
+      });
+
+      document.getElementById("owner-download-qr-btn").addEventListener("click", () => {
+        const a = document.createElement("a");
+        a.download = `Parth_Vault_QR_${ownerCalcStr}.png`;
+        a.href = ownerQrCanvas.toDataURL("image/png");
+        a.click();
+      });
+
+      userSelect.addEventListener("change", () => {
+        selectedUserId = userSelect.value;
+        renderSelectedUserPanel();
+      });
+
+      // Signed Official Receipt for Selected User
+      document.getElementById("owner-download-user-receipt-btn").addEventListener("click", () => {
+        const user = profiles.find(p => p.id === selectedUserId);
+        if (!user) return;
+        const items = allLedger.filter(l => l.user_id === user.id);
+        let total = 0, paid = 0, pending = 0;
+        items.forEach(i => {
+          const a = Number(i.amount) || 0;
+          total += a;
+          if (i.status === "paid") paid += a;
+          else pending += a;
+        });
+        window.generateOfficialReceipt({
+          user,
+          ledgerList: items,
+          summary: { total, paid, pending },
+          format: "pdf"
+        });
+      });
+
+      // Create New User Modal
+      const newUserModal = document.getElementById("new-user-modal");
+      document.getElementById("open-new-user-modal-btn").addEventListener("click", () => newUserModal.classList.add("active"));
+      document.getElementById("close-new-user-modal").addEventListener("click", () => newUserModal.classList.remove("active"));
+
+      document.getElementById("create-user-form").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const created = await window.VaultDB.createUser({
+          real_name: document.getElementById("new-user-realname").value,
+          username: document.getElementById("new-user-username").value,
+          phone: document.getElementById("new-user-phone").value,
+          passcode: document.getElementById("new-user-passcode").value
+        });
+        selectedUserId = created.id;
+        newUserModal.classList.remove("active");
+        e.target.reset();
+        await loadAllData();
+      });
+
+      // 3-STEP CONFIRMATION + 5-SECOND COUNTDOWN SAFEGUARD FOR DELETE USER / CLEAR HISTORY
+      const safeguardModal = document.getElementById("safeguard-modal");
+      const safeguardConfirmBtn = document.getElementById("safeguard-confirm-btn");
+      const safeguardStepIndicator = document.getElementById("safeguard-step-indicator");
+      let safeguardMode = "history"; // 'history' | 'user'
+      let safeguardStep = 1;
+      let countdownTimer = null;
+
+      function openSafeguard(mode) {
+        if (!selectedUserId) return;
+        safeguardMode = mode;
+        safeguardStep = 1;
+        clearInterval(countdownTimer);
+        safeguardConfirmBtn.disabled = false;
+        document.getElementById("safeguard-title").textContent =
+          mode === "user" ? "PERMANENTLY DELETE CLIENT ACCOUNT" : "WIPE CLIENT LEDGER HISTORY";
+        safeguardStepIndicator.textContent = "CONFIRMATION STEP: 1 OF 3";
+        safeguardConfirmBtn.textContent = "CONFIRM (1/3)";
+        safeguardModal.classList.add("active");
+      }
+
+      document.getElementById("safeguard-clear-history-btn").addEventListener("click", () => openSafeguard("history"));
+      document.getElementById("safeguard-delete-user-btn").addEventListener("click", () => openSafeguard("user"));
+      document.getElementById("safeguard-cancel-btn").addEventListener("click", () => {
+        clearInterval(countdownTimer);
+        safeguardModal.classList.remove("active");
+      });
+
+      safeguardConfirmBtn.addEventListener("click", async () => {
+        if (safeguardStep < 3) {
+          safeguardStep++;
+          if (safeguardStep === 2) {
+            safeguardStepIndicator.textContent = "CONFIRMATION STEP: 2 OF 3 — ARE YOU ABSOLUTELY SURE?";
+            safeguardConfirmBtn.textContent = "CONFIRM (2/3)";
+          } else if (safeguardStep === 3) {
+            // Start mandatory 5-second security timer before final click unlocks
+            let secondsLeft = 5;
+            safeguardConfirmBtn.disabled = true;
+            safeguardStepIndicator.textContent = `FINAL LOCK: WAIT ${secondsLeft} SECONDS TO UNLOCK EXECUTION...`;
+            safeguardConfirmBtn.textContent = `LOCKED (${secondsLeft}s)`;
+
+            countdownTimer = setInterval(() => {
+              secondsLeft--;
+              if (secondsLeft > 0) {
+                safeguardStepIndicator.textContent = `FINAL LOCK: WAIT ${secondsLeft} SECONDS TO UNLOCK EXECUTION...`;
+                safeguardConfirmBtn.textContent = `LOCKED (${secondsLeft}s)`;
+              } else {
+                clearInterval(countdownTimer);
+                safeguardConfirmBtn.disabled = false;
+                safeguardStepIndicator.textContent = "SECURITY TIMER COMPLETE — CLICK TO EXECUTE NOW";
+                safeguardConfirmBtn.textContent = safeguardMode === "user" ? "🔥 EXECUTE DELETE USER (3/3)" : "🔥 CLEAR HISTORY (3/3)";
+              }
+            }, 1000);
+          }
+        } else {
+          // Step 3 unlocked & clicked
+          await window.VaultDB.deleteUserOrHistory(selectedUserId, safeguardMode);
+          if (safeguardMode === "user") selectedUserId = null;
+          safeguardModal.classList.remove("active");
+          await loadAllData();
+        }
+      });
+
+      // Supabase Config Modal
+      const sbModal = document.getElementById("sb-config-modal");
+      document.getElementById("open-sb-config-btn").addEventListener("click", () => {
+        document.getElementById("sb-url-input").value = localStorage.getItem("PARTH_SB_URL") || "";
+        document.getElementById("sb-key-input").value = localStorage.getItem("PARTH_SB_KEY") || "";
+        sbModal.classList.add("active");
+      });
+      document.getElementById("close-sb-config-modal").addEventListener("click", () => sbModal.classList.remove("active"));
+      document.getElementById("save-sb-config-btn").addEventListener("click", async () => {
+        window.VaultDB.saveCredentials(
+          document.getElementById("sb-url-input").value,
+          document.getElementById("sb-key-input").value
+        );
+        sbModal.classList.remove("active");
+        await loadAllData();
+      });
+
+      await loadAllData();
+    });
+  </script>
+</body>
+</html>
