@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PARTH RAJPUROHIT • SOVEREIGN VAULT & INSTANT UPI GATEWAY</title>
+  <link rel="stylesheet" href="assets/css/vault.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+</head>
+<body>
+  <!-- Animated Dhan Varsha / Ramayan Celestial Background Canvas -->
+  <canvas id="bg-canvas"></canvas>
+  <div class="scanline-overlay"></div>
+
+  <!-- 3D Mechanical Bank Vault Door Intro -->
+  <div class="vault-door-wrapper" id="vault-door">
+    <div class="vault-panel left"></div>
+    <div class="vault-wheel-lock" id="vault-wheel" title="Click to Unlock Sovereign Vault">
+      <svg width="86" height="86" viewBox="0 0 100 100" fill="none">
+        <circle cx="50" cy="50" r="42" stroke="#FFD700" stroke-width="4" stroke-dasharray="10 6"/>
+        <circle cx="50" cy="50" r="22" stroke="#00FF87" stroke-width="3"/>
+        <path d="M50 8V92M8 50H92M20 20L80 80M80 20L20 80" stroke="#FFD700" stroke-width="3"/>
+      </svg>
+      <span>UNLOCK VAULT</span>
+    </div>
+    <div class="vault-panel right"></div>
+  </div>
+
+  <div class="app-shell">
+    <!-- Top Liquid Navigation -->
+    <header class="top-nav">
+      <div class="brand-cluster">
+        <div class="hacker-crest" title="Masked Sovereign Node">
+          <svg width="30" height="30" viewBox="0 0 64 64" fill="none">
+            <path d="M32 6L10 16V32C10 47 19.5 56.5 32 60C44.5 56.5 54 47 54 32V16L32 6Z" stroke="#FFD700" stroke-width="3" fill="rgba(255,215,0,0.08)"/>
+            <path d="M21 27L28 31L21 35V27ZM43 27L36 31L43 35V27Z" fill="#00FF87"/>
+            <path d="M22 44C26 48 38 48 42 44" stroke="#FFD700" stroke-width="3" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div>
+          <div class="brand-title">PARTH RAJPUROHIT SOVEREIGN VAULT</div>
+          <div class="brand-sub">
+            <span class="status-dot"></span>
+            <span id="celestial-mode-label">DHAN VARSHA • GOLD RAIN</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="nav-actions">
+        <!-- Celestial Sun/Moon/Dhan Varsha Switcher -->
+        <button class="celestial-btn" id="celestial-toggle-btn" title="Switch Ramayan Eclipse / Surya Astra / Dhan Varsha">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+          </svg>
+          <span>CELESTIAL REALM</span>
+        </button>
+
+        <!-- Single Unified Login Button (Routes Owner 9672910018 to /owner/ and Clients to /users/) -->
+        <button class="btn-cyber" id="open-login-modal-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+          </svg>
+          <span>ACCOUNT LOGIN</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Custom Parth Rajpurohit Reserve Currency Showcase -->
+    <section class="currency-showcase">
+      <div class="parth-banknote">
+        <div class="banknote-Header">
+          <span>SOVEREIGN RESERVE BANK OF PARTH RAJPUROHIT</span>
+          <span>SERIES PR-2026 • LEGAL TENDER PROTOCOL</span>
+          <span>SERIAL: PR₹-9672910018-GOLD</span>
+        </div>
+        <div class="banknote-body">
+          <div style="display:flex; align-items:center; gap:16px;">
+            <svg width="68" height="68" viewBox="0 0 80 80" fill="none">
+              <circle cx="40" cy="40" r="36" stroke="#FFD700" stroke-width="2.5" fill="rgba(255,215,0,0.1)"/>
+              <circle cx="40" cy="40" r="28" stroke="#00FF87" stroke-width="1.2" stroke-dasharray="4 4"/>
+              <text x="40" y="46" text-anchor="middle" fill="#FFD700" font-family="Syne" font-weight="800" font-size="20">PR₹</text>
+            </svg>
+            <div>
+              <div style="font-family:var(--font-display); font-size:1.35rem; font-weight:800; color:#FFD700;">
+                INSTANT ZERO-LATENCY UPI SETTLEMENT GATEWAY
+              </div>
+              <div style="font-size:0.86rem; color:var(--text-muted); margin-top:4px;">
+                Authorized Payee: <strong style="color:#fff;">Parth Rajpurohit</strong> • Encrypted Direct Bank Routing (FamPay &amp; Kotak Mahindra Bank)
+              </div>
+            </div>
+          </div>
+          <div>
+            <button class="btn-gold" id="hero-direct-pay-btn">
+              <span>⚡ LAUNCH DIRECT PAY TERMINAL</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Main 2-Column Interactive Gateway -->
+    <main class="grid-2" id="terminal-section">
+      <!-- Left Column: Numeric Calculator & Bank Route Selector -->
+      <div class="glass-card">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+          <div>
+            <h2 style="font-family:var(--font-display); font-size:1.25rem; color:var(--gold-primary);">
+              NUMERIC PAYMENT SYNTHESIZER
+            </h2>
+            <p style="font-size:0.8rem; color:var(--text-muted);">
+              Enter exact settlement value (up to 2 decimal places)
+            </p>
+          </div>
+          <span class="badge badge-paid">PAYEE: PARTH RAJPUROHIT</span>
+        </div>
+
+        <!-- Expandable Bank Channel Selector (FamPay vs Kotak Bank) -->
+        <div class="bank-drawer open" id="public-bank-drawer">
+          <div class="bank-drawer-header" id="public-bank-drawer-toggle">
+            <span>ACTIVE DESTINATION BANK: <strong id="selected-bank-label">FAMPAY (9672920018@fam)</strong></span>
+            <span>▼ EXPAND / SWITCH BANK</span>
+          </div>
+          <div class="bank-drawer-options">
+            <div class="bank-pill active" data-bank="fampay">
+              <div class="bank-pill-title">⚡ FamPay Sovereign</div>
+              <div class="bank-pill-id">9672920018@fam</div>
+            </div>
+            <div class="bank-pill" data-bank="kotak">
+              <div class="bank-pill-title">🏦 Kotak Mahindra Bank</div>
+              <div class="bank-pill-id">parthrajpurohit@kotakbank</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Calculator Screen -->
+        <div class="calc-screen">
+          <div class="calc-label">
+            <span>ENCRYPTED AMOUNT INPUT (INR)</span>
+            <span id="live-upi-id-indicator">9672920018@fam</span>
+          </div>
+          <div class="calc-value">₹<span id="calc-display">0</span></div>
+        </div>
+
+        <!-- Custom Numeric Keypad (Strictly Numbers & 2-Decimal Point) -->
+        <div class="keypad-grid" id="public-keypad">
+          <button class="key-btn" data-key="1">1</button>
+          <button class="key-btn" data-key="2">2</button>
+          <button class="key-btn" data-key="3">3</button>
+          <button class="key-btn" data-key="4">4</button>
+          <button class="key-btn" data-key="5">5</button>
+          <button class="key-btn" data-key="6">6</button>
+          <button class="key-btn" data-key="7">7</button>
+          <button class="key-btn" data-key="8">8</button>
+          <button class="key-btn" data-key="9">9</button>
+          <button class="key-btn" data-key=".">.</button>
+          <button class="key-btn" data-key="0">0</button>
+          <button class="key-btn" data-key="BACK">⌫</button>
+        </div>
+
+        <div style="display:flex; gap:12px;">
+          <button class="btn-danger" id="calc-clear-btn" style="flex:0.35;">CLEAR (C)</button>
+          <button class="btn-gold" id="calc-continue-btn" style="flex:0.65;">
+            <span>CONTINUE &amp; GENERATE QR / LINK →</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Right Column: Live QR Code, Copy Link, & Multi-App UPI Checkout -->
+      <div class="glass-card" id="checkout-output-card">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+          <div>
+            <h2 style="font-family:var(--font-display); font-size:1.25rem; color:var(--gold-primary);">
+              INSTANT QR &amp; MULTI-APP CHECKOUT
+            </h2>
+            <p style="font-size:0.8rem; color:var(--text-muted);">
+              Scan from any UPI app or tap your installed payment app below
+            </p>
+          </div>
+          <span class="badge badge-pending" id="checkout-amt-badge">₹0.00</span>
+        </div>
+
+        <!-- Top Dynamic QR Code Container -->
+        <div class="qr-vault-frame">
+          <div class="qr-canvas-wrap">
+            <canvas id="public-qr-canvas" width="230" height="230"></canvas>
+          </div>
+          <div style="margin-top:12px; font-family:var(--font-mono); font-size:0.82rem; color:var(--gold-primary);">
+            PAYING TO: <strong>PARTH RAJPUROHIT</strong> (<span id="qr-bank-sub">9672920018@fam</span>)
+          </div>
+        </div>
+
+        <!-- Primary Action Buttons: Copy Link & Pay Here -->
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px;">
+          <button class="btn-cyber" id="copy-upi-link-btn">
+            <span>📋 COPY PAYMENT LINK</span>
+          </button>
+          <a href="#" class="btn-gold" id="direct-pay-here-btn">
+            <span>🚀 PAY HERE NOW</span>
+          </a>
+        </div>
+
+        <!-- Deep-Link App Chooser Grid -->
+        <div style="border-top:1px solid rgba(255,255,255,0.1); padding-top:14px;">
+          <div style="font-family:var(--font-mono); font-size:0.75rem; color:var(--text-muted); margin-bottom:8px;">
+            SELECT UPI APP ON YOUR PHONE (DIRECT INTENT REDIRECT):
+          </div>
+          <div class="upi-apps-grid">
+            <button class="upi-app-btn" data-app="gpay">
+              <span style="color:#4285F4; font-weight:800;">GPay</span>
+              <span style="font-size:0.7rem; color:var(--text-muted);">Google Pay</span>
+            </button>
+            <button class="upi-app-btn" data-app="phonepe">
+              <span style="color:#A855F7; font-weight:800;">PhonePe</span>
+              <span style="font-size:0.7rem; color:var(--text-muted);">Instant UPI</span>
+            </button>
+            <button class="upi-app-btn" data-app="paytm">
+              <span style="color:#00BAF2; font-weight:800;">Paytm</span>
+              <span style="font-size:0.7rem; color:var(--text-muted);">Paytm UPI</span>
+            </button>
+            <button class="upi-app-btn" data-app="fampay">
+              <span style="color:#FFD700; font-weight:800;">FamApp</span>
+              <span style="font-size:0.7rem; color:var(--text-muted);">FamPay</span>
+            </button>
+            <button class="upi-app-btn" data-app="bhim">
+              <span style="color:#00FF87; font-weight:800;">BHIM</span>
+              <span style="font-size:0.7rem; color:var(--text-muted);">NPCI BHIM</span>
+            </button>
+            <button class="upi-app-btn" data-app="other">
+              <span style="color:#FFF; font-weight:800;">Other Apps</span>
+              <span style="font-size:0.7rem; color:var(--text-muted);">System Chooser</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Goddess Lakshmi & Dhan Kalash Prosperity Sanctuary Footer -->
+    <footer class="lakshmi-altar">
+      <div style="display:flex; flex-direction:column; align-items:center; gap:10px;">
+        <!-- Intricate Golden Lotus & Kalash Emblem -->
+        <svg width="84" height="64" viewBox="0 0 120 90" fill="none">
+          <path d="M60 12C68 28 82 36 98 40C82 54 68 62 60 76C52 62 38 54 22 40C38 36 52 28 60 12Z" stroke="#FFD700" stroke-width="2.5" fill="rgba(255,215,0,0.15)"/>
+          <path d="M60 22C74 40 94 46 112 44C94 64 76 72 60 76C44 72 26 64 8 44C26 46 46 40 60 22Z" stroke="#00FF87" stroke-width="1.5"/>
+          <circle cx="60" cy="46" r="10" fill="#FFD700"/>
+          <text x="60" y="50" text-anchor="middle" fill="#050507" font-family="Syne" font-weight="800" font-size="11">श्री</text>
+        </svg>
+        <div style="font-family:var(--font-display); font-weight:800; font-size:1.05rem; color:var(--gold-primary); letter-spacing:1.5px;">
+          ॐ महालक्ष्म्यै नमः • SOVEREIGN PROSPERITY &amp; FORTUNE SANCTUARY
+        </div>
+        <p style="font-size:0.82rem; color:var(--text-muted); max-width:620px;">
+          Every transaction is cryptographically logged across Parth Rajpurohit's Sovereign Ledger with dual-bank routing and signed digital receipts.
+        </p>
+      </div>
+
+      <div class="footer-credit">
+        <span>Made with ❤️ by <a href="https://parth27.vercel.app" target="_blank" rel="noopener">Parth Rajpurohit</a></span>
+        <span>•</span>
+        <span>Official Shopping Storefront: <a href="https://aviorcart.vercel.app" target="_blank" rel="noopener">aviorcart.vercel.app</a></span>
+        <span>•</span>
+        <span>Portfolio: <a href="https://parth27.vercel.app" target="_blank" rel="noopener">parth27.vercel.app</a></span>
+      </div>
+    </footer>
+  </div>
+
+  <!-- UNIFIED LOGIN MODAL (Stealth Owner Detection for 9672910018) -->
+  <div class="modal-backdrop" id="login-modal">
+    <div class="glass-card" style="width:100%; max-width:440px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;">
+        <h3 style="font-family:var(--font-display); font-size:1.25rem; color:var(--gold-primary);">
+          VAULT IDENTITY AUTHENTICATION
+        </h3>
+        <button class="btn-danger" id="close-login-modal-btn" style="padding:5px 10px;">✕</button>
+      </div>
+      <p style="font-size:0.82rem; color:var(--text-muted); margin-bottom:16px;">
+        Enter your registered phone number, email, or username to unlock your personal ledger.
+      </p>
+      <form id="unified-login-form">
+        <label style="font-family:var(--font-mono); font-size:0.75rem; color:var(--gold-primary); display:block; margin-bottom:6px;">
+          PHONE NUMBER / EMAIL / USERNAME
+        </label>
+        <input type="text" id="login-identifier" class="input-field" placeholder="e.g. 9876543210" required />
+
+        <label style="font-family:var(--font-mono); font-size:0.75rem; color:var(--gold-primary); display:block; margin-bottom:6px;">
+          VAULT PASSCODE / PASSWORD
+        </label>
+        <input type="password" id="login-passcode" class="input-field" placeholder="Enter your passcode" required />
+
+        <div id="login-error-msg" style="color:var(--danger-crimson); font-family:var(--font-mono); font-size:0.78rem; margin-bottom:12px; display:none;"></div>
+
+        <button type="submit" class="btn-gold" style="width:100%;">
+          <span>UNLOCK ACCOUNT LEDGER →</span>
+        </button>
+      </form>
+      <div style="margin-top:14px; font-family:var(--font-mono); font-size:0.72rem; color:var(--text-muted); text-align:center;">
+        Demo Client: <span style="color:#fff;">9876543210</span> (Pass: <span style="color:#fff;">1234</span>)
+      </div>
+    </div>
+  </div>
+
+  <script src="assets/js/vault-core.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      let currentAmountStr = "0";
+      let selectedBank = "fampay";
+
+      const displayEl = document.getElementById("calc-display");
+      const badgeEl = document.getElementById("checkout-amt-badge");
+      const qrCanvas = document.getElementById("public-qr-canvas");
+      const liveUpiIdEl = document.getElementById("live-upi-id-indicator");
+      const qrBankSubEl = document.getElementById("qr-bank-sub");
+      const selectedBankLabelEl = document.getElementById("selected-bank-label");
+      const directPayHereBtn = document.getElementById("direct-pay-here-btn");
+
+      function normalizeInput(key) {
+        if (key === "BACK") {
+          currentAmountStr = currentAmountStr.slice(0, -1) || "0";
+          return;
+        }
+        if (key === ".") {
+          if (!currentAmountStr.includes(".")) {
+            currentAmountStr += ".";
+          }
+          return;
+        }
+        // Limit to 2 decimal places
+        if (currentAmountStr.includes(".")) {
+          const parts = currentAmountStr.split(".");
+          if (parts[1].length >= 2) return;
+        }
+        if (currentAmountStr === "0") {
+          currentAmountStr = key;
+        } else if (currentAmountStr.length < 9) {
+          currentAmountStr += key;
+        }
+      }
+
+      function refreshCheckoutUI(forceGenerate = false) {
+        const rawVal = parseFloat(currentAmountStr) || 0;
+        displayEl.textContent = currentAmountStr;
+        badgeEl.textContent = `₹${rawVal.toFixed(2)}`;
+
+        const links = buildUpiLinks(rawVal, selectedBank, "Parth Rajpurohit Vault Payment");
+        liveUpiIdEl.textContent = links.bank.upiId;
+        qrBankSubEl.textContent = links.bank.upiId;
+        selectedBankLabelEl.textContent = `${links.bank.label.toUpperCase()} (${links.bank.upiId})`;
+
+        const checkoutCard = document.getElementById("checkout-output-card");
+        if (rawVal > 0) {
+          directPayHereBtn.href = links.genericUpi;
+          directPayHereBtn.style.pointerEvents = "auto";
+          directPayHereBtn.style.opacity = "1";
+          renderCustomGoldQR(qrCanvas, links.genericUpi, selectedBank);
+          if (forceGenerate) {
+            checkoutCard.style.boxShadow = "0 0 45px rgba(255, 215, 0, 0.45)";
+            setTimeout(() => (checkoutCard.style.boxShadow = ""), 1200);
+          }
+        } else {
+          directPayHereBtn.href = "#";
+          directPayHereBtn.style.pointerEvents = "none";
+          directPayHereBtn.style.opacity = "0.5";
+          const ctx = qrCanvas.getContext("2d");
+          ctx.fillStyle = "#08080c";
+          ctx.fillRect(0, 0, qrCanvas.width, qrCanvas.height);
+          ctx.strokeStyle = "rgba(255, 215, 0, 0.35)";
+          ctx.lineWidth = 2;
+          ctx.strokeRect(16, 16, qrCanvas.width - 32, qrCanvas.height - 32);
+          ctx.fillStyle = "#FFD700";
+          ctx.font = "700 13px 'JetBrains Mono', monospace";
+          ctx.textAlign = "center";
+          ctx.fillText("ENTER AMOUNT", qrCanvas.width / 2, qrCanvas.height / 2 - 8);
+          ctx.fillStyle = "#9BA1AB";
+          ctx.font = "500 11px 'JetBrains Mono', monospace";
+          ctx.fillText("& CLICK CONTINUE", qrCanvas.width / 2, qrCanvas.height / 2 + 14);
+        }
+      }
+
+      // Keypad Listeners
+      document.querySelectorAll("#public-keypad .key-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          normalizeInput(btn.dataset.key);
+          refreshCheckoutUI();
+        });
+      });
+
+      // Keyboard numeric support
+      document.addEventListener("keydown", e => {
+        if (document.getElementById("login-modal").classList.contains("active")) return;
+        if (/^[0-9]$/.test(e.key)) {
+          normalizeInput(e.key);
+          refreshCheckoutUI();
+        } else if (e.key === ".") {
+          normalizeInput(".");
+          refreshCheckoutUI();
+        } else if (e.key === "Backspace") {
+          normalizeInput("BACK");
+          refreshCheckoutUI();
+        }
+      });
+
+      document.getElementById("calc-clear-btn").addEventListener("click", () => {
+        currentAmountStr = "0";
+        refreshCheckoutUI();
+      });
+
+      document.getElementById("calc-continue-btn").addEventListener("click", () => {
+        const rawVal = parseFloat(currentAmountStr) || 0;
+        if (rawVal <= 0) {
+          alert("Please enter an amount greater than ₹0 on the keypad first.");
+          return;
+        }
+        refreshCheckoutUI(true);
+        document.getElementById("checkout-output-card").scrollIntoView({ behavior: "smooth" });
+      });
+
+      document.getElementById("hero-direct-pay-btn").addEventListener("click", () => {
+        document.getElementById("terminal-section").scrollIntoView({ behavior: "smooth" });
+      });
+
+      // Bank Drawer Toggle & Selection
+      document.getElementById("public-bank-drawer-toggle").addEventListener("click", () => {
+        document.getElementById("public-bank-drawer").classList.toggle("open");
+      });
+
+      document.querySelectorAll("#public-bank-drawer .bank-pill").forEach(pill => {
+        pill.addEventListener("click", () => {
+          document.querySelectorAll("#public-bank-drawer .bank-pill").forEach(p => p.classList.remove("active"));
+          pill.classList.add("active");
+          selectedBank = pill.dataset.bank;
+          refreshCheckoutUI();
+        });
+      });
+
+      // Copy Link Button
+      document.getElementById("copy-upi-link-btn").addEventListener("click", async (e) => {
+        const numericVal = parseFloat(currentAmountStr) || 0;
+        if (numericVal <= 0) {
+          alert("Please enter an amount on the keypad first.");
+          return;
+        }
+        const links = buildUpiLinks(numericVal, selectedBank);
+        try {
+          await navigator.clipboard.writeText(links.genericUpi);
+          const btn = e.currentTarget;
+          const oldHtml = btn.innerHTML;
+          btn.innerHTML = "<span>✅ LINK COPIED!</span>";
+          setTimeout(() => (btn.innerHTML = oldHtml), 2000);
+        } catch (err) {
+          prompt("Copy your instant UPI link:", links.genericUpi);
+        }
+      });
+
+      // UPI App Deep-Link Buttons
+      document.querySelectorAll(".upi-app-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const app = btn.dataset.app;
+          const numericVal = parseFloat(currentAmountStr) || 0;
+          if (numericVal <= 0) {
+            alert("Please enter an amount on the keypad first.");
+            return;
+          }
+          const links = buildUpiLinks(numericVal, selectedBank);
+          const targetMap = {
+            gpay: links.gpay,
+            phonepe: links.phonepe,
+            paytm: links.paytm,
+            fampay: links.fampay,
+            bhim: links.bhim,
+            other: links.genericUpi
+          };
+          window.location.href = targetMap[app] || links.genericUpi;
+        });
+      });
+
+      // Login Modal & Stealth Owner Detection (9672910018 -> owner/index.html)
+      const loginModal = document.getElementById("login-modal");
+      document.getElementById("open-login-modal-btn").addEventListener("click", () => {
+        loginModal.classList.add("active");
+      });
+      document.getElementById("close-login-modal-btn").addEventListener("click", () => {
+        loginModal.classList.remove("active");
+      });
+
+      document.getElementById("unified-login-form").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const identifier = document.getElementById("login-identifier").value.trim();
+        const passcode = document.getElementById("login-passcode").value.trim();
+        const errEl = document.getElementById("login-error-msg");
+        errEl.style.display = "none";
+
+        // Stealth Owner Detection when 9672910018 is entered
+        if (identifier === "9672910018") {
+          const ownerProfile = await window.VaultDB.findUserByIdentifier("9672910018");
+          if (ownerProfile && ownerProfile.passcode && passcode !== ownerProfile.passcode) {
+            errEl.textContent = "Invalid Owner Master Passcode.";
+            errEl.style.display = "block";
+            return;
+          }
+          localStorage.setItem("PARTH_ACTIVE_SESSION", JSON.stringify({
+            id: ownerProfile ? ownerProfile.id : "owner-root-27",
+            phone: "9672910018",
+            real_name: "Parth Rajpurohit",
+            username: "parth_kingpin",
+            role: "owner"
+          }));
+          window.location.href = "owner/index.html";
+          return;
+        }
+
+        // Standard Client Lookup
+        const user = await window.VaultDB.findUserByIdentifier(identifier);
+        if (!user) {
+          errEl.textContent = "Account not found. Ask Parth Rajpurohit to provision your account.";
+          errEl.style.display = "block";
+          return;
+        }
+        if (user.passcode && user.passcode !== passcode) {
+          errEl.textContent = "Incorrect vault passcode.";
+          errEl.style.display = "block";
+          return;
+        }
+
+        localStorage.setItem("PARTH_ACTIVE_SESSION", JSON.stringify(user));
+        if (user.role === "owner" || user.phone === "9672910018") {
+          window.location.href = "owner/index.html";
+        } else {
+          window.location.href = "users/index.html";
+        }
+      });
+
+      refreshCheckoutUI();
+    });
+  </script>
+</body>
+</html>
