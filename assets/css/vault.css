@@ -1,0 +1,684 @@
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Syne:wght@600;700;800&display=swap');
+
+:root {
+  --bg-obsidian: #050507;
+  --bg-deep: #0b0c10;
+  --glass-surface: rgba(18, 19, 26, 0.72);
+  --glass-border: rgba(255, 215, 0, 0.22);
+  --gold-primary: #FFD700;
+  --gold-secondary: #D4AF37;
+  --gold-glow: rgba(255, 215, 0, 0.35);
+  --cyber-green: #00FF87;
+  --cyber-green-dim: rgba(0, 255, 135, 0.15);
+  --danger-crimson: #FF2A54;
+  --text-main: #F8F9FA;
+  --text-muted: #9BA1AB;
+  --font-display: 'Syne', sans-serif;
+  --font-sans: 'Plus Jakarta Sans', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+body.realm-solar {
+  --bg-obsidian: #120d04;
+  --bg-deep: #1e1507;
+  --glass-surface: rgba(34, 25, 8, 0.78);
+  --glass-border: rgba(255, 200, 55, 0.45);
+  --gold-primary: #FFE066;
+  --cyber-green: #FFB703;
+}
+
+body.realm-eclipse {
+  --bg-obsidian: #020205;
+  --bg-deep: #070812;
+  --glass-surface: rgba(10, 12, 24, 0.82);
+  --glass-border: rgba(0, 255, 135, 0.28);
+  --gold-primary: #00FF87;
+  --gold-secondary: #00B862;
+  --cyber-green: #FFD700;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  background-color: var(--bg-obsidian);
+  color: var(--text-main);
+  font-family: var(--font-sans);
+  min-height: 100vh;
+  overflow-x: hidden;
+  position: relative;
+  transition: background-color 0.8s cubic-bezier(0.22, 1, 0.36, 1), color 0.5s ease;
+}
+
+#bg-canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.scanline-overlay {
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%),
+              linear-gradient(90deg, rgba(255, 0, 0, 0.02), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.02));
+  background-size: 100% 3px, 6px 100%;
+  pointer-events: none;
+  z-index: 2;
+  opacity: 0.45;
+}
+
+/* 3D BANK VAULT DOOR INTRO */
+.vault-door-wrapper {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  pointer-events: all;
+  perspective: 1800px;
+  transition: visibility 1.2s, opacity 0.8s ease 0.9s;
+}
+
+.vault-door-wrapper.unlocked {
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+}
+
+.vault-panel {
+  width: 50%;
+  height: 100%;
+  background: radial-gradient(circle at center, #181a22 0%, #060709 100%);
+  border-top: 3px solid var(--gold-secondary);
+  border-bottom: 3px solid var(--gold-secondary);
+  position: relative;
+  transition: transform 1.15s cubic-bezier(0.77, 0, 0.175, 1);
+  display: flex;
+  align-items: center;
+  box-shadow: inset 0 0 90px rgba(0, 0, 0, 0.95);
+}
+
+.vault-panel.left {
+  border-right: 2px solid var(--gold-primary);
+  transform-origin: left center;
+  justify-content: flex-end;
+}
+
+.vault-panel.right {
+  border-left: 2px solid var(--gold-primary);
+  transform-origin: right center;
+  justify-content: flex-start;
+}
+
+.vault-door-wrapper.unlocked .vault-panel.left {
+  transform: translateX(-102%) rotateY(-25deg);
+}
+
+.vault-door-wrapper.unlocked .vault-panel.right {
+  transform: translateX(102%) rotateY(25deg);
+}
+
+.vault-wheel-lock {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 210px;
+  height: 210px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #2a2410 0%, #09090c 75%);
+  border: 4px solid var(--gold-primary);
+  box-shadow: 0 0 50px var(--gold-glow), inset 0 0 25px rgba(255, 215, 0, 0.4);
+  z-index: 10001;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.9s cubic-bezier(0.68, -0.55, 0.27, 1.55), opacity 0.4s ease 0.65s;
+}
+
+.vault-wheel-lock.spinning {
+  transform: translate(-50%, -50%) rotate(540deg) scale(1.18);
+  opacity: 0;
+}
+
+.vault-wheel-lock span {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 2px;
+  color: var(--gold-primary);
+  margin-top: 8px;
+  text-transform: uppercase;
+}
+
+/* LAYOUT & LIQUID GLASS CONTAINERS */
+.app-shell {
+  position: relative;
+  z-index: 5;
+  max-width: 1260px;
+  margin: 0 auto;
+  padding: 20px 24px 80px;
+}
+
+.top-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  background: var(--glass-surface);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid var(--glass-border);
+  border-radius: 22px;
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  margin-bottom: 28px;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+.brand-cluster {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.hacker-crest {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.2), rgba(0, 255, 135, 0.1));
+  border: 1px solid var(--gold-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 20px var(--gold-glow);
+}
+
+.brand-title {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.3rem;
+  letter-spacing: 0.5px;
+  background: linear-gradient(90deg, #FFF 0%, var(--gold-primary) 55%, var(--cyber-green) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.brand-sub {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--cyber-green);
+  box-shadow: 0 0 10px var(--cyber-green);
+  animation: pulseDot 2s infinite;
+}
+
+@keyframes pulseDot {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.35); opacity: 0.55; }
+}
+
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* CELESTIAL RAMAYAN / DHAN VARSHA SUN-MOON BUTTON */
+.celestial-btn {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 10px 16px;
+  border-radius: 999px;
+  border: 1px solid var(--gold-primary);
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.18), rgba(15, 15, 20, 0.9));
+  color: var(--gold-primary);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  box-shadow: 0 0 22px rgba(255, 215, 0, 0.25);
+}
+
+.celestial-btn:hover {
+  transform: translateY(-2px) scale(1.03);
+  box-shadow: 0 0 32px rgba(255, 215, 0, 0.55);
+}
+
+.celestial-btn svg {
+  transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.celestial-btn:active svg {
+  transform: rotate(190deg) scale(1.25);
+}
+
+/* LIQUID GLASS BUTTONS */
+.btn-gold {
+  background: linear-gradient(135deg, #FFD700 0%, #C59B27 100%);
+  color: #050507;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.92rem;
+  padding: 12px 22px;
+  border-radius: 14px;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 10px 28px rgba(255, 215, 0, 0.32), inset 0 1px 1px rgba(255, 255, 255, 0.6);
+  transition: all 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+  text-decoration: none;
+}
+
+.btn-gold:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 34px rgba(255, 215, 0, 0.5);
+}
+
+.btn-cyber {
+  background: rgba(0, 255, 135, 0.12);
+  color: var(--cyber-green);
+  border: 1px solid rgba(0, 255, 135, 0.4);
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 0.84rem;
+  padding: 10px 18px;
+  border-radius: 12px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.25s ease;
+  text-decoration: none;
+}
+
+.btn-cyber:hover {
+  background: rgba(0, 255, 135, 0.24);
+  box-shadow: 0 0 20px rgba(0, 255, 135, 0.3);
+}
+
+.btn-danger {
+  background: rgba(255, 42, 84, 0.14);
+  color: var(--danger-crimson);
+  border: 1px solid rgba(255, 42, 84, 0.45);
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 0.82rem;
+  padding: 9px 16px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.btn-danger:hover:not(:disabled) {
+  background: var(--danger-crimson);
+  color: #fff;
+  box-shadow: 0 0 24px rgba(255, 42, 84, 0.5);
+}
+
+.btn-danger:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* CARDS & FRAMES */
+.glass-card {
+  background: var(--glass-surface);
+  backdrop-filter: blur(22px) saturate(160%);
+  -webkit-backdrop-filter: blur(22px) saturate(160%);
+  border: 1px solid var(--glass-border);
+  border-radius: 24px;
+  padding: 26px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.glass-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -50%;
+  width: 200%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--gold-primary), var(--cyber-green), transparent);
+  opacity: 0.55;
+}
+
+/* PARTH RESERVE BANK CURRENCY NOTE */
+.currency-showcase {
+  margin: 22px 0;
+  perspective: 1200px;
+}
+
+.parth-banknote {
+  background: linear-gradient(135deg, #1b1608 0%, #2e240d 35%, #121714 70%, #29200b 100%);
+  border: 2px solid var(--gold-primary);
+  border-radius: 18px;
+  padding: 20px 26px;
+  position: relative;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.75), 0 0 25px rgba(255, 215, 0, 0.2);
+  overflow: hidden;
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.parth-banknote:hover {
+  transform: rotateX(4deg) rotateY(-4deg) scale(1.015);
+}
+
+.banknote-Header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px dashed rgba(255, 215, 0, 0.35);
+  padding-bottom: 10px;
+  margin-bottom: 14px;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--gold-primary);
+  letter-spacing: 1.5px;
+}
+
+.banknote-body {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+
+/* KEYPAD / CALCULATOR */
+.calc-screen {
+  background: rgba(5, 6, 9, 0.9);
+  border: 1px solid var(--gold-primary);
+  border-radius: 18px;
+  padding: 18px 20px;
+  margin-bottom: 16px;
+  text-align: right;
+  box-shadow: inset 0 0 25px rgba(255, 215, 0, 0.12);
+}
+
+.calc-label {
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  color: var(--text-muted);
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.calc-value {
+  font-family: var(--font-mono);
+  font-size: 2.3rem;
+  font-weight: 800;
+  color: var(--gold-primary);
+  text-shadow: 0 0 18px rgba(255, 215, 0, 0.45);
+  word-break: break-all;
+}
+
+.keypad-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.key-btn {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 215, 0, 0.2);
+  border-radius: 16px;
+  padding: 16px 0;
+  font-family: var(--font-mono);
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--text-main);
+  cursor: pointer;
+  transition: all 0.16s cubic-bezier(0.22, 1, 0.36, 1);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.key-btn:hover {
+  background: rgba(255, 215, 0, 0.14);
+  border-color: var(--gold-primary);
+  color: var(--gold-primary);
+  transform: translateY(-2px);
+}
+
+.key-btn:active {
+  transform: scale(0.94);
+}
+
+/* BANK SELECTOR EXPANDABLE DRAWER */
+.bank-drawer {
+  background: rgba(9, 10, 15, 0.85);
+  border: 1px solid rgba(255, 215, 0, 0.28);
+  border-radius: 16px;
+  margin-bottom: 18px;
+  overflow: hidden;
+}
+
+.bank-drawer-header {
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  color: var(--gold-primary);
+}
+
+.bank-drawer-options {
+  display: none;
+  padding: 12px 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  gap: 10px;
+}
+
+.bank-drawer.open .bank-drawer-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+.bank-pill {
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.03);
+  cursor: pointer;
+  transition: all 0.22s ease;
+  text-align: left;
+}
+
+.bank-pill.active {
+  border-color: var(--gold-primary);
+  background: rgba(255, 215, 0, 0.15);
+  box-shadow: 0 0 18px rgba(255, 215, 0, 0.25);
+}
+
+.bank-pill-title {
+  font-weight: 700;
+  font-size: 0.88rem;
+  color: #fff;
+}
+
+.bank-pill-id {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  margin-top: 3px;
+}
+
+/* UPI CHECKOUT APPS GRID */
+.upi-apps-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.upi-app-btn {
+  padding: 12px 10px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.04);
+  color: #fff;
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 0.82rem;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.22s ease;
+}
+
+.upi-app-btn:hover {
+  border-color: var(--gold-primary);
+  background: rgba(255, 215, 0, 0.12);
+  transform: translateY(-2px);
+}
+
+/* QR FRAME */
+.qr-vault-frame {
+  background: radial-gradient(circle at center, #1b170a 0%, #07080c 100%);
+  border: 2px solid var(--gold-primary);
+  border-radius: 22px;
+  padding: 20px;
+  text-align: center;
+  box-shadow: 0 0 35px rgba(255, 215, 0, 0.22);
+  margin-bottom: 18px;
+}
+
+.qr-canvas-wrap {
+  background: #fff;
+  padding: 12px;
+  border-radius: 16px;
+  display: inline-block;
+  border: 3px solid var(--gold-primary);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.6);
+}
+
+/* GODDESS LAKSHMI DHAN ALTAR FOOTER */
+.lakshmi-altar {
+  margin-top: 48px;
+  padding: 28px;
+  border-radius: 26px;
+  background: linear-gradient(180deg, rgba(255, 215, 0, 0.09) 0%, rgba(10, 10, 14, 0.95) 100%);
+  border: 1px solid rgba(255, 215, 0, 0.35);
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.footer-credit {
+  margin-top: 24px;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.footer-credit a {
+  color: var(--gold-primary);
+  text-decoration: none;
+  font-weight: 700;
+  border-bottom: 1px dashed var(--gold-primary);
+  transition: all 0.2s ease;
+}
+
+.footer-credit a:hover {
+  color: var(--cyber-green);
+  border-color: var(--cyber-green);
+}
+
+/* MODALS & CHRONO LOADER */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(3, 4, 7, 0.84);
+  backdrop-filter: blur(16px);
+  z-index: 2000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.modal-backdrop.active {
+  display: flex;
+}
+
+.input-field {
+  width: 100%;
+  padding: 13px 16px;
+  background: rgba(0, 0, 0, 0.55);
+  border: 1px solid rgba(255, 215, 0, 0.28);
+  border-radius: 12px;
+  color: #fff;
+  font-family: var(--font-mono);
+  font-size: 0.92rem;
+  margin-bottom: 14px;
+  outline: none;
+}
+
+.input-field:focus {
+  border-color: var(--gold-primary);
+  box-shadow: 0 0 15px rgba(255, 215, 0, 0.25);
+}
+
+/* BADGES & TABLES */
+.badge {
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.badge-paid { background: rgba(0, 255, 135, 0.16); color: var(--cyber-green); border: 1px solid rgba(0, 255, 135, 0.4); }
+.badge-unpaid { background: rgba(255, 42, 84, 0.16); color: var(--danger-crimson); border: 1px solid rgba(255, 42, 84, 0.4); }
+.badge-pending { background: rgba(255, 215, 0, 0.16); color: var(--gold-primary); border: 1px solid rgba(255, 215, 0, 0.4); }
+.badge-bank { background: rgba(255, 255, 255, 0.08); color: #fff; border: 1px solid rgba(255, 255, 255, 0.2); }
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 24px;
+}
+
+@media (max-width: 920px) {
+  .grid-2 {
+    grid-template-columns: 1fr;
+  }
+}
