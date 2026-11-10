@@ -9,8 +9,8 @@ const VAULT_CONFIG = {
     fampay: {
       code: "fampay",
       label: "FamPay Sovereign",
-      upiId: "9672920018@fam",
-      badge: "FAMPAY • 9672920018@fam"
+      upiId: "9672910018@fam",
+      badge: "FAMPAY • 9672910018@fam"
     },
     kotak: {
       code: "kotak",
